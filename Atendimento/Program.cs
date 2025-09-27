@@ -1,5 +1,9 @@
 
+using Atendimento.Data;
+using Atendimento.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -46,6 +50,12 @@ namespace Atendimento
                     }
                 });
             });
+
+            builder.Services.AddDbContext<AppDbContext>(opt =>
+                opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+            builder.Services.AddScoped<IPasswordHasher<object>, PasswordHasher<object>>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             var jwtSection = builder.Configuration.GetSection("Jwt");
             var issuer = jwtSection["Issuer"];
