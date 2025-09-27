@@ -1,4 +1,5 @@
 ﻿using Atendimento.Models.Auth;
+using Atendimento.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -10,26 +11,18 @@ namespace Atendimento.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(IConfiguration configuration, IAuthService authService) : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-
-        public AuthController(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         [HttpPost("login")]
         [AllowAnonymous]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
         {
-            if (!IsValidUser(request.Username, request.Password))
-                return Unauthorized(new { error = "invalid_credentials" });
+            var user = await authService.ValidateUserAsync(request.Username, request.Password, ct);
+            if (user is null) return Unauthorized(new { error = "invalid_credentials" });
 
-            var token = GenerateJwtToken(request.Username, out var expiresUtc);
-            return Ok(new AuthResponse { AccessToken = token, ExpiresAtUtc = expiresUtc });
+            var token = GenerateJwtToken(user.Username, out var exp);
+            return Ok(new AuthResponse { AccessToken = token, ExpiresAtUtc = exp });
         }
-
 
         [HttpGet("me")]
         [Authorize]
@@ -40,12 +33,9 @@ namespace Atendimento.Controllers
             return Ok(new { user = name, roles });
         }
 
-        private static bool IsValidUser(string username, string password)
-            => username == "admin" && password == "123456";
-
         private string GenerateJwtToken(string username, out DateTime expiresUtc)
         {
-            var jwtSection = _configuration.GetSection("Jwt");
+            var jwtSection = configuration.GetSection("Jwt");
             var issuer = jwtSection["Issuer"];
             var audience = jwtSection["Audience"];
             var key = jwtSection["Key"];
