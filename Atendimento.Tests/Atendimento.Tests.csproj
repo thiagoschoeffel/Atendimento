@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Atendimento.Api\Atendimento.Api.csproj" />
     <ProjectReference Include="..\Atendimento\Atendimento.Api.csproj" />
   </ItemGroup>
 
