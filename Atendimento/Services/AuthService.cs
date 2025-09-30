@@ -1,10 +1,9 @@
-﻿using Atendimento.Data;
-using Atendimento.Models;
+﻿using Atendimento.Api.Data;
+using Atendimento.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
-namespace Atendimento.Services
+namespace Atendimento.Api.Services
 {
     public interface IAuthService
     {

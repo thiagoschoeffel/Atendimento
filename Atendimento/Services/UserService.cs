@@ -1,12 +1,12 @@
-﻿using Atendimento.Data;
-using Atendimento.Exceptions;
-using Atendimento.Models;
+﻿using Atendimento.Api.Exceptions;
+using Atendimento.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Microsoft.Data.Sqlite;
+using Atendimento.Api.Data;
 
-namespace Atendimento.Services
+namespace Atendimento.Api.Services
 {
     public interface IUserService
     {

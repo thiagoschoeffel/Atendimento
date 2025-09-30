@@ -1,7 +1,7 @@
-﻿using Atendimento.Data;
-using Atendimento.Exceptions;
-using Atendimento.Models;
-using Atendimento.Services;
+﻿using Atendimento.Api.Data;
+using Atendimento.Api.Exceptions;
+using Atendimento.Api.Services;
+using Atendimento.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

@@ -1,8 +1,8 @@
-﻿using Atendimento.Models;
-using Atendimento.Models.Auth;
+﻿using Atendimento.Api.Models;
+using Atendimento.Api.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 
-namespace Atendimento.Data
+namespace Atendimento.Api.Data
 {
 
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)

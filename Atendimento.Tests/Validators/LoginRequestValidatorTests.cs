@@ -1,5 +1,5 @@
-﻿using Atendimento.Models.Auth;
-using Atendimento.Validators;
+﻿using Atendimento.Api.Models.Auth;
+using Atendimento.Api.Validators;
 using FluentValidation.TestHelper;
 
 namespace Atendimento.Tests.Validators

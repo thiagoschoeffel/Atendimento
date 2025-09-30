@@ -1,9 +1,9 @@
-﻿using Atendimento.Exceptions;
-using Atendimento.Models.Common;
+﻿using Atendimento.Api.Exceptions;
+using Atendimento.Api.Models.Common;
 using System.Net;
 using System.Text.Json;
 
-namespace Atendimento.Filters
+namespace Atendimento.Api.Filters
 {
     public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
     {

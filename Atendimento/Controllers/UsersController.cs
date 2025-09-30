@@ -1,11 +1,9 @@
-﻿using Atendimento.Models;
-using Atendimento.Models.Auth;
-using Atendimento.Services;
+﻿using Atendimento.Api.Models.Auth;
+using Atendimento.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Atendimento.Controllers
+namespace Atendimento.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

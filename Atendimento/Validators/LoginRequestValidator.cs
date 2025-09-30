@@ -1,7 +1,7 @@
-﻿using Atendimento.Models.Auth;
+﻿using Atendimento.Api.Models.Auth;
 using FluentValidation;
 
-namespace Atendimento.Validators
+namespace Atendimento.Api.Validators
 {
     public class LoginRequestValidator : AbstractValidator<LoginRequest>
     {

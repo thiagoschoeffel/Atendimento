@@ -1,8 +1,8 @@
-﻿using Atendimento.Models.Common;
+﻿using Atendimento.Api.Models.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Atendimento.Filters
+namespace Atendimento.Api.Filters
 {
     public class ModelValidationFilter : IActionFilter, IOrderedFilter
     {

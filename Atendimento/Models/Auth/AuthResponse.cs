@@ -1,4 +1,4 @@
-﻿namespace Atendimento.Models.Auth
+﻿namespace Atendimento.Api.Models.Auth
 {
     public sealed class AuthResponse
     {

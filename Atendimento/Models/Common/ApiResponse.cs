@@ -1,4 +1,4 @@
-﻿namespace Atendimento.Models.Common
+﻿namespace Atendimento.Api.Models.Common
 {
     public record ApiError(string Code, string Message, object? Details = null);
 

@@ -1,7 +1,7 @@
-﻿using Atendimento.Data;
-using Atendimento.Models;
-using Atendimento.Models.Auth;
-using Atendimento.Validators;
+﻿using Atendimento.Api.Data;
+using Atendimento.Api.Models;
+using Atendimento.Api.Models.Auth;
+using Atendimento.Api.Validators;
 using FluentValidation.TestHelper;
 using Microsoft.EntityFrameworkCore;
 

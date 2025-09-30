@@ -1,6 +1,6 @@
-using Atendimento.Data;
-using Atendimento.Filters;
-using Atendimento.Services;
+using Atendimento.Api.Data;
+using Atendimento.Api.Services;
+using Atendimento.Api.Filters;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
-namespace Atendimento
+namespace Atendimento.Api
 {
     public class Program
     {

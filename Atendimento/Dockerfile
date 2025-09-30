@@ -12,16 +12,16 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Atendimento/Atendimento.csproj", "Atendimento/"]
-RUN dotnet restore "./Atendimento/Atendimento.csproj"
+COPY ["Atendimento/Atendimento.Api.csproj", "Atendimento/"]
+RUN dotnet restore "./Atendimento/Atendimento.Api.csproj"
 COPY . .
-WORKDIR "/src/Atendimento"
-RUN dotnet build "./Atendimento.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Atendimento.Api"
+RUN dotnet build "./Atendimento.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Atendimento.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Atendimento.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Esta fase é usada na produção ou quando executada no VS no modo normal (padrão quando não está usando a configuração de Depuração)
 FROM base AS final

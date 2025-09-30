@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Atendimento.Migrations
+namespace Atendimento.Api.Migrations
 {
     /// <inheritdoc />
     public partial class RefreshTokens : Migration

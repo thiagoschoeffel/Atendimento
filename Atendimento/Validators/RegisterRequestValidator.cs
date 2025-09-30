@@ -1,9 +1,9 @@
-﻿using Atendimento.Data;
-using Atendimento.Models.Auth;
+﻿using Atendimento.Api.Data;
+using Atendimento.Api.Models.Auth;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Atendimento.Validators
+namespace Atendimento.Api.Validators
 {
     public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
     {

@@ -1,13 +1,11 @@
-﻿using Atendimento.Models.Auth;
-using Atendimento.Services;
+﻿using Atendimento.Api.Data;
+using Atendimento.Api.Models.Auth;
+using Atendimento.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
-namespace Atendimento.Controllers
+namespace Atendimento.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -58,7 +56,7 @@ namespace Atendimento.Controllers
             oldToken.RevokedAtUtc = DateTime.UtcNow;
             oldToken.RevokedByIp = HttpContext.Connection.RemoteIpAddress?.ToString();
 
-            await HttpContext.RequestServices.GetRequiredService<Atendimento.Data.AppDbContext>().SaveChangesAsync(ct);
+            await HttpContext.RequestServices.GetRequiredService<AppDbContext>().SaveChangesAsync(ct);
             Response.Cookies.Delete("refreshToken");
             return NoContent();
         }

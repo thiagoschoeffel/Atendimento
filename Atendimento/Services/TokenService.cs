@@ -1,6 +1,6 @@
-﻿using Atendimento.Data;
-using Atendimento.Models;
-using Atendimento.Models.Auth;
+﻿using Atendimento.Api.Data;
+using Atendimento.Api.Models;
+using Atendimento.Api.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -10,7 +10,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Atendimento.Services
+namespace Atendimento.Api.Services
 {
     public sealed class JwtOptions
     {

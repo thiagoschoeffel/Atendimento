@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Atendimento.Models.Auth
+namespace Atendimento.Api.Models.Auth
 {
     public class RefreshToken
     {
@@ -9,7 +9,7 @@ namespace Atendimento.Models.Auth
 
         [Required] public string Token { get; set; } = default!;
         [Required] public Guid UserId { get; set; }
-        public Atendimento.Models.User User { get; set; } = default!;
+        public User User { get; set; } = default!;
 
         public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
         public string? CreatedByIp { get; set; }

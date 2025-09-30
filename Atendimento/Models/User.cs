@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Atendimento.Models
+namespace Atendimento.Api.Models
 {
     public class User
     {

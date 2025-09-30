@@ -1,4 +1,4 @@
-﻿namespace Atendimento.Exceptions
+﻿namespace Atendimento.Api.Exceptions
 {
     public class ConflictException(string code, string message, object? details = null) : Exception(message)
     {
