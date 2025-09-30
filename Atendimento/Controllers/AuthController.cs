@@ -11,17 +11,68 @@ namespace Atendimento.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IConfiguration configuration, IAuthService authService) : ControllerBase
+    public class AuthController(IAuthService auth, ITokenService tokens, IConfiguration cfg, IWebHostEnvironment env) : ControllerBase
     {
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
+        public async Task<IActionResult> Login([FromBody] LoginRequest req, CancellationToken ct)
         {
-            var user = await authService.ValidateUserAsync(request.Username, request.Password, ct);
+            var user = await auth.ValidateUserAsync(req.Username, req.Password, ct);
             if (user is null) return Unauthorized(new { error = "invalid_credentials" });
 
-            var token = GenerateJwtToken(user.Username, out var exp);
-            return Ok(new AuthResponse { AccessToken = token, ExpiresAtUtc = exp });
+            var access = tokens.GenerateAccessToken(user, out var accessExp);
+            var days = cfg.GetValue<int>("Auth:RefreshTokenDays", 7);
+            var refresh = tokens.NewRefresh(user.Id, HttpContext.Connection.RemoteIpAddress?.ToString(), days);
+            await tokens.SaveRefreshAsync(refresh, ct);
+
+            SetRefreshCookie(refresh.Token, refresh.ExpiresAtUtc);
+            return Ok(new AuthResponse { AccessToken = access, ExpiresAtUtc = accessExp });
+        }
+
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Refresh(CancellationToken ct)
+        {
+            var cookie = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(cookie)) return Unauthorized(new { error = "missing_refresh" });
+
+            var (user, oldToken) = await tokens.GetActiveRefreshAsync(cookie, ct);
+
+            var access = tokens.GenerateAccessToken(user, out var accessExp);
+            var days = HttpContext.RequestServices.GetRequiredService<IConfiguration>().GetValue<int>("Auth:RefreshTokenDays", 7);
+            var newRefresh = tokens.NewRefresh(user.Id, HttpContext.Connection.RemoteIpAddress?.ToString(), days);
+            await tokens.RotateAsync(oldToken, newRefresh, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
+
+            SetRefreshCookie(newRefresh.Token, newRefresh.ExpiresAtUtc);
+            return Ok(new AuthResponse { AccessToken = access, ExpiresAtUtc = accessExp });
+        }
+
+        [HttpPost("revoke")]
+        [Authorize]
+        public async Task<IActionResult> Revoke(CancellationToken ct)
+        {
+            var cookie = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(cookie)) return BadRequest(new { error = "missing_refresh" });
+
+            var (_, oldToken) = await tokens.GetActiveRefreshAsync(cookie, ct);
+            oldToken.RevokedAtUtc = DateTime.UtcNow;
+            oldToken.RevokedByIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            await HttpContext.RequestServices.GetRequiredService<Atendimento.Data.AppDbContext>().SaveChangesAsync(ct);
+            Response.Cookies.Delete("refreshToken");
+            return Ok(new { success = true });
+        }
+
+        private void SetRefreshCookie(string token, DateTime expiresUtc)
+        {
+            Response.Cookies.Append("refreshToken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = expiresUtc,
+                Path = "/"
+            });
         }
 
         [HttpGet("me")]
@@ -31,39 +82,6 @@ namespace Atendimento.Controllers
             var name = User.Identity?.Name ?? "(unknown)";
             var roles = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToArray();
             return Ok(new { user = name, roles });
-        }
-
-        private string GenerateJwtToken(string username, out DateTime expiresUtc)
-        {
-            var jwtSection = configuration.GetSection("Jwt");
-            var issuer = jwtSection["Issuer"];
-            var audience = jwtSection["Audience"];
-            var key = jwtSection["Key"];
-            var expirationMinutes = int.TryParse(jwtSection["ExpirationMinutes"], out var m) ? m : 60;
-
-            var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, username),
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.Role, "admin")
-        };
-
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!));
-            var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-            expiresUtc = DateTime.UtcNow.AddMinutes(expirationMinutes);
-
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                notBefore: DateTime.UtcNow,
-                expires: expiresUtc,
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

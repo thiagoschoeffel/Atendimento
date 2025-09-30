@@ -57,6 +57,8 @@ namespace Atendimento
             builder.Services.AddScoped<IPasswordHasher<object>, PasswordHasher<object>>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
             var jwtSection = builder.Configuration.GetSection("Jwt");
             var issuer = jwtSection["Issuer"];
