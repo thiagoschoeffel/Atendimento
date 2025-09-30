@@ -60,7 +60,7 @@ namespace Atendimento.Controllers
 
             await HttpContext.RequestServices.GetRequiredService<Atendimento.Data.AppDbContext>().SaveChangesAsync(ct);
             Response.Cookies.Delete("refreshToken");
-            return Ok(new { success = true });
+            return NoContent();
         }
 
         private void SetRefreshCookie(string token, DateTime expiresUtc)

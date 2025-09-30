@@ -1,5 +1,5 @@
-
 using Atendimento.Data;
+using Atendimento.Filters;
 using Atendimento.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +15,16 @@ namespace Atendimento
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddControllers();
+            builder.Services
+                .AddControllers(opt =>
+                {
+                    opt.Filters.Add(new ApiResponseWrapperFilter());
+                    opt.Filters.Add(new ModelValidationFilter());
+                })
+                .ConfigureApiBehaviorOptions(opt =>
+                {
+                    opt.SuppressModelStateInvalidFilter = true;
+                });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -60,15 +69,19 @@ namespace Atendimento
             builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
             builder.Services.AddScoped<ITokenService, TokenService>();
 
-            var jwtSection = builder.Configuration.GetSection("Jwt");
-            var issuer = jwtSection["Issuer"];
-            var audience = jwtSection["Audience"];
-            var key = jwtSection["Key"];
-
             builder.Services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
+                    var jwt = builder.Configuration.GetSection("Jwt");
+                    var issuer = jwt["Issuer"]!;
+                    var audience = jwt["Audience"]!;
+                    var key = jwt["Key"]!;
+
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -77,7 +90,7 @@ namespace Atendimento
                         ValidateLifetime = true,
                         ValidIssuer = issuer,
                         ValidAudience = audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
                         ClockSkew = TimeSpan.FromSeconds(30)
                     };
                 });
@@ -95,6 +108,7 @@ namespace Atendimento
             }
 
             app.UseHttpsRedirection();
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
