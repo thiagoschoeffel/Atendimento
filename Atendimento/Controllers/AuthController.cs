@@ -11,7 +11,7 @@ namespace Atendimento.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IAuthService auth, ITokenService tokens, IConfiguration cfg, IWebHostEnvironment env) : ControllerBase
+    public class AuthController(IAuthService auth, ITokenService tokens, IConfiguration cfg) : ControllerBase
     {
         [HttpPost("login")]
         [AllowAnonymous]
