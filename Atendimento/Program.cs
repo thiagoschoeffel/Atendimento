@@ -1,6 +1,7 @@
 using Atendimento.Data;
 using Atendimento.Filters;
 using Atendimento.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +19,15 @@ namespace Atendimento
             builder.Services
                 .AddControllers(opt =>
                 {
-                    opt.Filters.Add(new ApiResponseWrapperFilter());
+                    opt.Filters.Add(new FluentValidationActionFilter());
                     opt.Filters.Add(new ModelValidationFilter());
+                    opt.Filters.Add(new ApiResponseWrapperFilter());
                 })
                 .ConfigureApiBehaviorOptions(opt =>
                 {
                     opt.SuppressModelStateInvalidFilter = true;
                 });
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -37,7 +40,7 @@ namespace Atendimento
                 var jwtScheme = new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",            // minúsculo, por padrão RFC6750
+                    Scheme = "bearer",
                     BearerFormat = "JWT",
                     Description = "Informe apenas o token (sem 'Bearer ')"
                 };

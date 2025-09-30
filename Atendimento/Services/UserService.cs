@@ -1,7 +1,9 @@
 ﻿using Atendimento.Data;
+using Atendimento.Exceptions;
 using Atendimento.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Atendimento.Services
 {
@@ -17,14 +19,20 @@ namespace Atendimento.Services
 
         public async Task<User> CreateAsync(string username, string password, CancellationToken ct)
         {
-            if (await db.Users.AnyAsync(u => u.Username == username, ct))
-                throw new InvalidOperationException("username_already_exists");
-
             var hash = hasher.HashPassword(_pwdScope, password);
             var user = new User { Username = username, PasswordHash = hash };
 
             db.Users.Add(user);
-            await db.SaveChangesAsync(ct);
+            try
+            {
+                await db.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg &&
+                                               pg.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                throw new ConflictException("username_already_exists", "Usuário já existe.");
+            }
+
             return user;
         }
 

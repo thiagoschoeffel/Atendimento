@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Atendimento.Filters
 {
-    public class ModelValidationFilter : IActionFilter
+    public class ModelValidationFilter : IActionFilter, IOrderedFilter
     {
-        public void OnActionExecuted(ActionExecutedContext context)
+        public int Order => 10;
+
+        public void OnActionExecuting(ActionExecutingContext context)
         {
             if (!context.ModelState.IsValid)
             {
@@ -19,12 +21,11 @@ namespace Atendimento.Filters
 
                 var traceId = context.HttpContext.TraceIdentifier;
                 var resp = ApiResponse.Fail("validation_error", "Dados inválidos.", errors, traceId);
+
                 context.Result = new BadRequestObjectResult(resp);
             }
         }
 
-        public void OnActionExecuting(ActionExecutingContext context)
-        {
-        }
+        public void OnActionExecuted(ActionExecutedContext context) { }
     }
 }

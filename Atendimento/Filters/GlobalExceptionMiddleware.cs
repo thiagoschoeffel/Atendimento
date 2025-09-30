@@ -1,5 +1,7 @@
-﻿using Atendimento.Models.Common;
+﻿using Atendimento.Exceptions;
+using Atendimento.Models.Common;
 using System.Net;
+using System.Text.Json;
 
 namespace Atendimento.Filters
 {
@@ -22,17 +24,43 @@ namespace Atendimento.Filters
         {
             var traceId = ctx.TraceIdentifier;
 
-            var (status, code, message) = ex switch
+            HttpStatusCode status;
+            string code;
+            string message;
+            object? details = null;
+
+            switch (ex)
             {
-                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "unauthorized", "Não autorizado."),
-                System.Security.SecurityException => (HttpStatusCode.Forbidden, "forbidden", "Acesso negado."),
-                _ => (HttpStatusCode.InternalServerError, "internal_error", "Erro inesperado.")
-            };
+                case ConflictException ce:
+                    status = HttpStatusCode.Conflict;
+                    code = ce.Code;
+                    message = ce.Message;
+                    details = ce.Details;
+                    break;
 
-            ctx.Response.ContentType = "application/json";
+                case UnauthorizedAccessException:
+                    status = HttpStatusCode.Unauthorized;
+                    code = "unauthorized";
+                    message = "Não autorizado.";
+                    break;
+
+                case System.Security.SecurityException:
+                    status = HttpStatusCode.Forbidden;
+                    code = "forbidden";
+                    message = "Acesso negado.";
+                    break;
+
+                default:
+                    status = HttpStatusCode.InternalServerError;
+                    code = "internal_error";
+                    message = "Erro inesperado.";
+                    break;
+            }
+
             ctx.Response.StatusCode = (int)status;
+            ctx.Response.ContentType = "application/json";
 
-            var body = System.Text.Json.JsonSerializer.Serialize(
+            var body = JsonSerializer.Serialize(
                 ApiResponse.Fail(code, message, null, traceId));
 
             return ctx.Response.WriteAsync(body);
